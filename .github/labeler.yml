@@ -1,0 +1,7 @@
+# Add 'backend' label
+backend:
+  - api/**/*
+
+# Add 'client' label
+client:
+  - ui/**/*

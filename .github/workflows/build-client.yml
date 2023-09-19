@@ -1,0 +1,45 @@
+name: Client
+on:
+  push:
+    paths-ignore:
+      - "docs/**"
+      - "api/**"
+    branches:
+      - master
+      - release/*
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+jobs:
+  build-client:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup NodeJS
+        uses: actions/setup-node@v3
+        with:
+          node-version: "14"
+
+      - uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install Dependencies & Build Docker Image
+        run: |
+          cd ./ui
+          npm install
+          npm run build
+          docker build -t hantsy/react-boot-mongo-kotlin-client .
+
+#       - name: Login to DockerHub Registry
+#         run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+
+#       - name: Push Docker Image
+#         run: docker push hantsy/react-boot-mongo-kotlin-client
