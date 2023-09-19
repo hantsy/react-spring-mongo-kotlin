@@ -110,6 +110,7 @@ class RouterConfig {
             POST("", handler::create)
             "{id}".nest {
                 GET("", handler::getById)
+                PUT("", handler::update)
                 DELETE("", handler::deleteById)
             }
         }
@@ -134,7 +135,7 @@ class RouterConfig {
             }
 
             val builder = status(HttpStatus.INTERNAL_SERVER_ERROR)
-            // ... additional builder calls
+            error.printStackTrace()
             return builder.buildAndAwait()
         }
     }
@@ -206,6 +207,29 @@ class PersonHandler(private val persons: PersonRepository, private val validator
         } ?: notFound().buildAndAwait()
     }
 
+    suspend fun update(req: ServerRequest): ServerResponse {
+        val id = req.pathVariables()["id"] ?: throw IllegalArgumentException("id is required.")
+
+        val person = persons.findById(id) ?: run {
+            return notFound().buildAndAwait()
+        }
+        val body = req.awaitBody(CreatePersonCommand::class)
+        val errors = validator.validate(body)
+        if (errors.isNotEmpty()) {
+            throw ConstraintViolationException("Input validation failed", errors)
+        }
+        val toUpdated = person.apply {
+            firstName = body.firstName
+            lastName = body.lastName
+            birthOfDate = body.birthOfDate
+            email = body.email?.let { Email(it) }
+            phoneNumber = body.phoneNumber?.let { PhoneNumber(it) }
+            address = body.address
+        }
+        persons.save(toUpdated)
+        return noContent().buildAndAwait()
+    }
+
     suspend fun deleteById(req: ServerRequest): ServerResponse {
         val id = req.pathVariables()["id"] ?: throw IllegalArgumentException("id is required.")
         persons.deleteById(id)
@@ -273,10 +297,10 @@ data class Address(
 data class Person(
     @Id
     val id: String? = null,
-    val firstName: String,
-    val lastName: String,
-    val birthOfDate: LocalDate,
-    val email: Email? = null,
-    val phoneNumber: PhoneNumber? = null,
-    val address: Address? = null
+    var firstName: String,
+    var lastName: String,
+    var birthOfDate: LocalDate,
+    var email: Email? = null,
+    var phoneNumber: PhoneNumber? = null,
+    var address: Address? = null
 )
