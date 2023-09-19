@@ -54,7 +54,7 @@ class PersonRouterTest {
                 id = UUID.randomUUID().toString(),
                 firstName = "foo",
                 lastName = "bar",
-                birthOfData = LocalDate.now().minusYears(20),
+                birthOfDate = LocalDate.now().minusYears(20),
                 email = Email("foo@example.com"),
                 phoneNumber = PhoneNumber("+12223334444"),
                 address = Address(
@@ -84,7 +84,7 @@ class PersonRouterTest {
                 id = UUID.randomUUID().toString(),
                 firstName = "foo",
                 lastName = "bar",
-                birthOfData = LocalDate.now().minusYears(20),
+                birthOfDate = LocalDate.now().minusYears(20),
                 email = Email("foo@example.com"),
                 phoneNumber = PhoneNumber("+12223334444"),
                 address = Address(
@@ -120,7 +120,7 @@ class PersonRouterTest {
                     id = id,
                     firstName = "foo",
                     lastName = "bar",
-                    birthOfData = LocalDate.now().minusYears(20),
+                    birthOfDate = LocalDate.now().minusYears(20),
                     email = Email("foo@example.com"),
                     phoneNumber = PhoneNumber("+12223334444"),
                     address = Address(
@@ -158,7 +158,7 @@ class PersonRouterTest {
                     id = id,
                     firstName = "foo",
                     lastName = "bar",
-                    birthOfData = LocalDate.now().minusYears(20),
+                    birthOfDate = LocalDate.now().minusYears(20),
                     email = Email("foo@example.com"),
                     phoneNumber = PhoneNumber("+12223334444"),
                     address = Address(
@@ -171,7 +171,7 @@ class PersonRouterTest {
         val body = CreatePersonCommand(
             firstName = "foo",
             lastName = "bar",
-            birthOfData = LocalDate.now().minusYears(20),
+            birthOfDate = LocalDate.now().minusYears(20),
             email = "foo@example.com",
             phoneNumber = "+12223334444",
             address = Address(
@@ -197,7 +197,7 @@ class PersonRouterTest {
                     id = id,
                     firstName = "foo",
                     lastName = "bar",
-                    birthOfData = LocalDate.now().minusYears(20),
+                    birthOfDate = LocalDate.now().minusYears(20),
                     email = Email("foo@example.com"),
                     phoneNumber = PhoneNumber("+12223334444"),
                     address = Address(
@@ -210,7 +210,7 @@ class PersonRouterTest {
         val body = CreatePersonCommand(
             firstName = "foo",
             lastName = "bar",
-            birthOfData = LocalDate.now().minusYears(20),
+            birthOfDate = LocalDate.now().minusYears(20),
             email = "example.com", // invalid email
             phoneNumber = "+12223334444",
             address = Address(

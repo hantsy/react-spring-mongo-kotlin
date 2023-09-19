@@ -59,12 +59,14 @@ class DataInitializer(private val persons: PersonRepository) : ApplicationRunner
                         Person(
                             firstName = "foo",
                             lastName = "bar",
-                            birthOfData = LocalDate.now().minusYears(30)
+                            birthOfDate = LocalDate.now().minusYears(30),
+                            email = Email("foo@example.com")
                         ),
                         Person(
                             firstName = "Java",
                             lastName = "Duck",
-                            birthOfData = LocalDate.now().minusYears(28)
+                            birthOfDate = LocalDate.now().minusYears(28),
+                            email = Email("java@example.com")
                         )
                     )
                 )
@@ -81,10 +83,10 @@ class DataInitializer(private val persons: PersonRepository) : ApplicationRunner
 }
 
 @Configuration
-class CorsConfig{
+class CorsConfig {
 
     @Bean
-    fun corsConfiguration() : CorsConfigurationSource {
+    fun corsConfiguration(): CorsConfigurationSource {
         val configuration = CorsConfiguration().applyPermitDefaultValues()
             .apply {
                 allowedOrigins = listOf("localhost", "mytrustedwebsite.com")
@@ -150,14 +152,31 @@ class PersonHandler(private val persons: PersonRepository, private val validator
         log.debug("query params offset:$offset, limit: $limit")
 
         val query = req.queryParam("q").getOrNull() ?: run {
-            return ok().bodyAndAwait(persons.findAll().drop(offset).take(limit))
+            return ok().bodyAndAwait(
+                persons.findAll().drop(offset).take(limit)
+                    .map {
+                        PersonSummary(
+                            id = it.id,
+                            name = "${it.firstName} ${it.lastName}",
+                            email = it.email?.value,
+                            birthOfDate = it.birthOfDate
+                        )
+                    }
+            )
         }
         log.debug("has extra query: $query")
         return ok().bodyAndAwait(
             persons.findByFirstNameLikeIgnoreCaseOrLastNameLikeIgnoreCaseOrEmailLikeIgnoreCase(
                 ".*$query.*",
                 PageRequest.of(offset / limit, limit)
-            )
+            ).map {
+                PersonSummary(
+                    id = it.id,
+                    name = "${it.firstName} ${it.lastName}",
+                    email = it.email?.value,
+                    birthOfDate = it.birthOfDate
+                )
+            }
         )
     }
 
@@ -171,7 +190,7 @@ class PersonHandler(private val persons: PersonRepository, private val validator
             Person(
                 firstName = body.firstName,
                 lastName = body.lastName,
-                birthOfData = body.birthOfData,
+                birthOfDate = body.birthOfDate,
                 email = body.email?.let { Email(it) },
                 phoneNumber = body.phoneNumber?.let { PhoneNumber(it) },
                 address = body.address
@@ -194,6 +213,13 @@ class PersonHandler(private val persons: PersonRepository, private val validator
     }
 }
 
+data class PersonSummary(
+    val id: String? = null,
+    val name: String,
+    val email: String? = null,
+    val birthOfDate: LocalDate? = null
+)
+
 data class CreatePersonCommand(
     @field:NotBlank
     val firstName: String,
@@ -201,7 +227,7 @@ data class CreatePersonCommand(
     val lastName: String,
     @field:NotNull
     @field:Past
-    val birthOfData: LocalDate,
+    val birthOfDate: LocalDate,
 
     @field:jakarta.validation.constraints.Email
     val email: String? = null,
@@ -230,10 +256,10 @@ interface PersonRepository : CoroutineCrudRepository<Person, String>,
 }
 
 @JvmInline
-value class Email(val s: String)
+value class Email(val value: String)
 
 @JvmInline
-value class PhoneNumber(val s: String)
+value class PhoneNumber(val value: String)
 
 data class Address(
     val line1: String,
@@ -249,7 +275,7 @@ data class Person(
     val id: String? = null,
     val firstName: String,
     val lastName: String,
-    val birthOfData: LocalDate,
+    val birthOfDate: LocalDate,
     val email: Email? = null,
     val phoneNumber: PhoneNumber? = null,
     val address: Address? = null

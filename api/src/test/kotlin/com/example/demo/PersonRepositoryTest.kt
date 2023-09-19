@@ -34,7 +34,7 @@ class PersonRepositoryTest {
             Person(
                 firstName = "foo",
                 lastName = "bar",
-                birthOfData = LocalDate.now().minusYears(30),
+                birthOfDate = LocalDate.now().minusYears(30),
                 email = Email("foo@example.com"),
                 address = Address(
                     line1 = "test line 1",
