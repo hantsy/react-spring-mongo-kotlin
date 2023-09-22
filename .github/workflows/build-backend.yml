@@ -2,9 +2,8 @@ name: Backend
 
 on:
   push:
-    paths-ignore:
-      - "docs/**"
-      - "ui/**"
+    paths:
+      - "api/**"
     branches:
       - master
       - release/*
