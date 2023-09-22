@@ -32,9 +32,9 @@ class IntegrationTests {
     fun `get all persons`() = runTest {
         client.get().uri("/persons")
             .awaitExchange { clientResponse ->
-                val entity = clientResponse.awaitEntity<List<Person>>()
+                val entity = clientResponse.awaitEntity<List<PersonSummary>>()
                 entity.statusCode shouldBe HttpStatus.OK
-                entity.body!!.forAny { it.firstName shouldBe "foo" }
+                entity.body!!.forAny { it.name shouldBe "foo" }
             }
     }
 

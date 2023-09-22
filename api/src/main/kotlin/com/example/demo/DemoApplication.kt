@@ -182,7 +182,7 @@ class PersonHandler(private val persons: PersonRepository, private val validator
     }
 
     suspend fun create(req: ServerRequest): ServerResponse {
-        val body = req.awaitBody(CreatePersonCommand::class)
+        val body = req.awaitBody(PersonFormData::class)
         val errors = validator.validate(body)
         if (errors.isNotEmpty()) {
             throw ConstraintViolationException("Input validation failed", errors)
@@ -213,7 +213,7 @@ class PersonHandler(private val persons: PersonRepository, private val validator
         val person = persons.findById(id) ?: run {
             return notFound().buildAndAwait()
         }
-        val body = req.awaitBody(CreatePersonCommand::class)
+        val body = req.awaitBody(PersonFormData::class)
         val errors = validator.validate(body)
         if (errors.isNotEmpty()) {
             throw ConstraintViolationException("Input validation failed", errors)
@@ -244,7 +244,7 @@ data class PersonSummary(
     val birthOfDate: LocalDate? = null
 )
 
-data class CreatePersonCommand(
+data class PersonFormData(
     @field:NotBlank
     val firstName: String,
     @field:NotBlank

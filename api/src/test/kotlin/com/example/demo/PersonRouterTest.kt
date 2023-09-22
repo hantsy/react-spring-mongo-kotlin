@@ -168,7 +168,7 @@ class PersonRouterTest {
                     )
                 )
 
-        val body = CreatePersonCommand(
+        val body = PersonFormData(
             firstName = "foo",
             lastName = "bar",
             birthOfDate = LocalDate.now().minusYears(20),
@@ -207,7 +207,7 @@ class PersonRouterTest {
                     )
                 )
 
-        val body = CreatePersonCommand(
+        val body = PersonFormData(
             firstName = "foo",
             lastName = "bar",
             birthOfDate = LocalDate.now().minusYears(20),
@@ -226,4 +226,98 @@ class PersonRouterTest {
 
         coVerify(exactly = 0) { persons.save(any()) } // verify it is not called
     }
+
+    @Test
+    fun `update person`() = runTest {
+        val id = UUID.randomUUID().toString()
+        coEvery { persons.findById(any()) } returns
+                Person(
+                    id = id,
+                    firstName = "foo",
+                    lastName = "bar",
+                    birthOfDate = LocalDate.now().minusYears(20),
+                    email = Email("foo@example.com"),
+                    phoneNumber = PhoneNumber("+12223334444"),
+                    address = Address(
+                        line1 = "test line1",
+                        city = "NY",
+                        zipCode = "12345"
+                    )
+                )
+        coEvery { persons.save(any()) } returns
+                Person(
+                    id = id,
+                    firstName = "test",
+                    lastName = "test",
+                    birthOfDate = LocalDate.now().minusYears(20),
+                    email = Email("foo@example.com"),
+                    phoneNumber = PhoneNumber("+12223334444"),
+                    address = Address(
+                        line1 = "test line1",
+                        city = "NY",
+                        zipCode = "12345"
+                    )
+                )
+
+        val body = PersonFormData(
+            firstName = "foo",
+            lastName = "bar",
+            birthOfDate = LocalDate.now().minusYears(20),
+            email = "foo@example.com",
+            phoneNumber = "+12223334444",
+            address = Address(
+                line1 = "test line1",
+                city = "NY",
+                zipCode = "12345"
+            )
+        )
+
+        client.put().uri("/persons/$id").bodyValue(body)
+            .exchange()
+            .expectStatus().isNoContent
+
+        coVerify(exactly = 1) { persons.findById(any()) }
+        coVerify(exactly = 1) { persons.save(any()) }
+    }
+
+    @Test
+    fun `update person when not found`() = runTest {
+        val id = UUID.randomUUID().toString()
+        coEvery { persons.findById(any()) } returns null
+        coEvery { persons.save(any()) } returns
+                Person(
+                    id = id,
+                    firstName = "test",
+                    lastName = "test",
+                    birthOfDate = LocalDate.now().minusYears(20),
+                    email = Email("foo@example.com"),
+                    phoneNumber = PhoneNumber("+12223334444"),
+                    address = Address(
+                        line1 = "test line1",
+                        city = "NY",
+                        zipCode = "12345"
+                    )
+                )
+
+        val body = PersonFormData(
+            firstName = "foo",
+            lastName = "bar",
+            birthOfDate = LocalDate.now().minusYears(20),
+            email = "foo@example.com",
+            phoneNumber = "+12223334444",
+            address = Address(
+                line1 = "test line1",
+                city = "NY",
+                zipCode = "12345"
+            )
+        )
+
+        client.put().uri("/persons/$id").bodyValue(body)
+            .exchange()
+            .expectStatus().isNotFound
+
+        coVerify(exactly = 1) { persons.findById(any()) }
+        coVerify(exactly = 0) { persons.save(any()) }
+    }
+
 }
