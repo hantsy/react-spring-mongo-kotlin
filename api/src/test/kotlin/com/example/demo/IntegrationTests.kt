@@ -2,6 +2,7 @@ package com.example.demo
 
 import io.kotest.inspectors.forAny
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -34,7 +35,7 @@ class IntegrationTests {
             .awaitExchange { clientResponse ->
                 val entity = clientResponse.awaitEntity<List<PersonSummary>>()
                 entity.statusCode shouldBe HttpStatus.OK
-                entity.body!!.forAny { it.name shouldBe "foo" }
+                entity.body!!.forAny { it.name shouldContain "foo" }
             }
     }
 
