@@ -1,21 +1,37 @@
+import {
+  RouteObject,
+  RouterProvider,
+  createBrowserRouter,
+} from "react-router-dom";
+import "./App.css";
+import { ContactsLayout, PersonEdit, PersonList } from "./contacts";
+import { Home, HomeLayout} from "./home";
+import ErrorPage from "./ErrorPage";
 
-import React from 'react';
-import './App.css';
-import Home from './Home';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import PersonList from './PersonList';
-import PersonEdit from './PersonEdit';
+const routes: RouteObject[] = [
+  {
+    path: "/",
+    element: <HomeLayout />,
+    children: [{ path: "", element: <Home /> }],
+  },
+  {
+    path: "/contacts",
+    element: <ContactsLayout />,
+    children: [
+      { path: "", element: <PersonList /> },
+      { path: ":id", element: <PersonEdit /> },
+    ],
+  },
+  {
+    path: "*",
+    element: <ErrorPage/>,
+  },
+];
+
+const router = createBrowserRouter(routes);
 
 const App = () => {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Home/>}/>
-        <Route path="/persons" element={<PersonList/>}/>
-        <Route path="/persons/:id" element={<PersonEdit/>}/>
-      </Routes>
-    </Router>
-  )
-}
+  return <RouterProvider router={router} />;
+};
 
 export default App;

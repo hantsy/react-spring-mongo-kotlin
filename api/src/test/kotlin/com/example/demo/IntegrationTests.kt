@@ -33,9 +33,9 @@ class IntegrationTests {
     fun `get all persons`() = runTest {
         client.get().uri("/persons")
             .awaitExchange { clientResponse ->
-                val entity = clientResponse.awaitEntity<List<PersonSummary>>()
+                val entity = clientResponse.awaitEntity<PaginatedResult<PersonSummary>>()
                 entity.statusCode shouldBe HttpStatus.OK
-                entity.body!!.forAny { it.name shouldContain "foo" }
+                entity.body!!.data.forAny { it.name shouldContain "foo" }
             }
     }
 

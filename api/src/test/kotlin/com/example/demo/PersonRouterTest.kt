@@ -64,12 +64,15 @@ class PersonRouterTest {
                 )
             )
         )
+        coEvery { persons.count() } returns 15L
         client.get().uri("/persons")
             .exchange()
             .expectStatus().isOk
-            .expectBody().jsonPath("$.[0].firstName", equalTo("foo"))
+            .expectBody().jsonPath("$.data[0].name").isEqualTo("foo bar")
+            .jsonPath("$.count").isEqualTo(15)
 
         coVerify(exactly = 1) { persons.findAll() }
+        coVerify(exactly = 1) { persons.count() }
     }
 
     @Test
@@ -94,6 +97,9 @@ class PersonRouterTest {
                 )
             )
         )
+        coEvery {
+            persons.countByFirstNameLikeIgnoreCaseOrLastNameLikeIgnoreCaseOrEmailLikeIgnoreCase(any())
+        } returns 15L
         client.get().uri { builder ->
             builder.path("/persons").queryParam("q", "foo")
                 .queryParam("offset", 0)
@@ -102,13 +108,17 @@ class PersonRouterTest {
         }
             .exchange()
             .expectStatus().isOk
-            .expectBody().jsonPath("$.[0].firstName", equalTo("foo"))
+            .expectBody().jsonPath("$.data[0].name").isEqualTo("foo bar")
+            .jsonPath("$.count").isEqualTo(15)
 
         coVerify(exactly = 1) {
             persons.findByFirstNameLikeIgnoreCaseOrLastNameLikeIgnoreCaseOrEmailLikeIgnoreCase(
                 any(),
                 any()
             )
+        }
+        coVerify(exactly = 1) {
+            persons.countByFirstNameLikeIgnoreCaseOrLastNameLikeIgnoreCaseOrEmailLikeIgnoreCase(any())
         }
     }
 

@@ -153,8 +153,30 @@ class PersonHandler(private val persons: PersonRepository, private val validator
         log.debug("query params offset:$offset, limit: $limit")
 
         val query = req.queryParam("q").getOrNull() ?: run {
-            return ok().bodyAndAwait(
-                persons.findAll().drop(offset).take(limit)
+            return ok().bodyValueAndAwait(
+                PaginatedResult(
+                    persons.findAll().drop(offset).take(limit)
+                        .map {
+                            PersonSummary(
+                                id = it.id,
+                                name = "${it.firstName} ${it.lastName}",
+                                email = it.email?.value,
+                                birthOfDate = it.birthOfDate
+                            )
+                        }
+                        .toList(),
+                    persons.count()
+                )
+            )
+        }
+        log.debug("has extra query: $query")
+        return ok().bodyValueAndAwait(
+            PaginatedResult(
+                persons
+                    .findByFirstNameLikeIgnoreCaseOrLastNameLikeIgnoreCaseOrEmailLikeIgnoreCase(
+                        ".*$query.*",
+                        PageRequest.of(offset / limit, limit)
+                    )
                     .map {
                         PersonSummary(
                             id = it.id,
@@ -163,21 +185,9 @@ class PersonHandler(private val persons: PersonRepository, private val validator
                             birthOfDate = it.birthOfDate
                         )
                     }
+                    .toList(),
+                persons.countByFirstNameLikeIgnoreCaseOrLastNameLikeIgnoreCaseOrEmailLikeIgnoreCase(".*$query.*")
             )
-        }
-        log.debug("has extra query: $query")
-        return ok().bodyAndAwait(
-            persons.findByFirstNameLikeIgnoreCaseOrLastNameLikeIgnoreCaseOrEmailLikeIgnoreCase(
-                ".*$query.*",
-                PageRequest.of(offset / limit, limit)
-            ).map {
-                PersonSummary(
-                    id = it.id,
-                    name = "${it.firstName} ${it.lastName}",
-                    email = it.email?.value,
-                    birthOfDate = it.birthOfDate
-                )
-            }
         )
     }
 
@@ -237,6 +247,8 @@ class PersonHandler(private val persons: PersonRepository, private val validator
     }
 }
 
+data class PaginatedResult<out T>(val data: List<T>, val count: Long)
+
 data class PersonSummary(
     val id: String? = null,
     val name: String,
@@ -277,6 +289,22 @@ interface PersonRepository : CoroutineCrudRepository<Person, String>,
         query: String,
         of: PageRequest
     ): Flow<Person>
+
+    @Query(
+        value = """
+       {
+           ${'$'}or: [
+                {'firstName': {${'$'}regex: ?0, ${'$'}options:'i' }},
+                {'firstName': {${'$'}regex: ?0, ${'$'}options:'i' }}, 
+                {'email': {${'$'}regex: ?0, ${'$'}options:'i' }}
+            ]
+       } 
+    """,
+        count = true
+    )
+    fun countByFirstNameLikeIgnoreCaseOrLastNameLikeIgnoreCaseOrEmailLikeIgnoreCase(
+        query: String
+    ): Long
 }
 
 @JvmInline
