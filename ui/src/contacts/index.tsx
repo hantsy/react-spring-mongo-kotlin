@@ -1,5 +1,5 @@
-import ContactsLayout from "./ContactsLayout";
-import PersonEditPage from "./ContactEditPage";
-import ContactListPage from "./ContactListPage";
+import ContactsLayout from './ContactsLayout';
+import ContactEditPage from './ContactEditPage';
+import ContactListPage from './ContactListPage';
 
-export { PersonEditPage as PersonEdit, ContactListPage as PersonList, ContactsLayout };
+export { ContactEditPage, ContactListPage, ContactsLayout };

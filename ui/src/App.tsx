@@ -1,12 +1,13 @@
+import React from "react";
 import {
   RouteObject,
   RouterProvider,
   createBrowserRouter,
 } from "react-router-dom";
 import "./App.css";
-import { ContactsLayout, PersonEdit, PersonList } from "./contacts";
-import { Home, HomeLayout} from "./home";
 import ErrorPage from "./ErrorPage";
+import { ContactEditPage, ContactListPage, ContactsLayout } from "./contacts";
+import { Home, HomeLayout } from "./home";
 
 const routes: RouteObject[] = [
   {
@@ -18,8 +19,8 @@ const routes: RouteObject[] = [
     path: "/contacts",
     element: <ContactsLayout />,
     children: [
-      { path: "", element: <PersonList /> },
-      { path: ":id", element: <PersonEdit /> },
+      { path: "", element: <ContactListPage /> },
+      { path: ":id", element: <ContactEditPage /> },
     ],
   },
   {

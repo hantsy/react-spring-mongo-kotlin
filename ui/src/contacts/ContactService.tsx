@@ -1,11 +1,11 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext } from 'react';
 
 // https://medium.com/the-guild/injectable-services-in-react-de0136b6d476
-const personsBaseUrl = "/api/persons";
+const personsBaseUrl = '/api/persons';
 
-const ContactContext = createContext(null);
+const ServiceContext = createContext(null);
 
-export const ContactProvider = (props: any) => {
+const ServiceProvider = (props: any) => {
   const value = {
     getAll: props.getAll || getAll,
     getById: props.getById || getById,
@@ -15,14 +15,14 @@ export const ContactProvider = (props: any) => {
   } as any;
 
   return (
-    <ContactContext.Provider value={value}>
+    <ServiceContext.Provider value={value}>
       ...props.children
-    </ContactContext.Provider>
+    </ServiceContext.Provider>
   );
 };
 
-export const useContactContext = () => {
-  return useContext(ContactContext);
+const useService = () => {
+  return useContext(ServiceContext);
 };
 
 const getAll = (
@@ -32,14 +32,14 @@ const getAll = (
 ) => {
   const params = new URLSearchParams();
   if (query) {
-    params.append("q", query);
+    params.append('q', query);
   }
-  params.append("offset", offset + "");
-  params.append("limit", limit + "");
+  params.append('offset', offset + '');
+  params.append('limit', limit + '');
   return fetch(`${personsBaseUrl}`, {
     body: params,
     headers: {
-      Accept: "application/json",
+      Accept: 'application/json',
     },
   });
 };
@@ -47,7 +47,7 @@ const getAll = (
 const getById = (id: string) => {
   return fetch(`${personsBaseUrl}/${id}`, {
     headers: {
-      Accept: "application/json",
+      Accept: 'application/json',
     },
   });
 };
@@ -55,9 +55,9 @@ const getById = (id: string) => {
 const save = (body: any) => {
   return fetch(`${personsBaseUrl}`, {
     body: JSON.stringify(body),
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
   });
 };
@@ -65,15 +65,17 @@ const save = (body: any) => {
 const update = (id: string, body: any) => {
   return fetch(`${personsBaseUrl}/${id}`, {
     body: JSON.stringify(body),
-    method: "PUT",
+    method: 'PUT',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
   });
 };
 
 const deleteById = (id: string) => {
   return fetch(`${personsBaseUrl}/${id}`, {
-    method: "DELETE",
+    method: 'DELETE',
   });
 };
+
+export { ServiceProvider, useService };
